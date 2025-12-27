@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Tracker - Employee Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --primary-dark: #4338ca;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --bg: #f8fafc;
+            --bg-secondary: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--dark);
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 60px 24px 32px;
+            color: white;
+            border-radius: 0 0 32px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.05)"/></svg>');
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .greeting h1 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 2px;
+            color: white;
+        }
+
+        .greeting p {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .notification-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .notification-btn:active {
+            transform: scale(0.95);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        /* Active Task Card */
+        .active-task {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .task-location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .quick-action-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .task-progress {
+            display: flex;
+            gap: 12px;
+        }
+
+        .task-stat {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .task-stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .task-stat-label {
+            font-size: 11px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            padding: 24px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px 12px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #3b82f6;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #10b981;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #f59e0b;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        /* Progress Card */
+        .progress-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .progress-ring-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 24px;
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 14;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 14;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .progress-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+        }
+
+        /* Route Timeline */
+        .route-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .route-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: #f1f5f9;
+        }
+
+        .timeline-line-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 2px;
+            transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 56px;
+            margin-bottom: 24px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .timeline-item.current .timeline-dot {
+            background: white;
+            color: var(--primary);
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            animation: pulse-checkpoint 2s infinite;
+        }
+
+        .timeline-item.pending .timeline-dot {
+            background: #f1f5f9;
+            color: var(--gray-light);
+            border: 2px solid #e2e8f0;
+        }
+
+        .timeline-content {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .timeline-item.current .timeline-content {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .timeline-location {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 32px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--gray);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            transition: var(--transition);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .nav-center {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-top: -30px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-center:active {
+            transform: translateY(-2px) scale(0.95);
+        }
+
+        /* Scan Screen */
+        .scan-container {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .scan-box {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 32px;
+            border: 4px solid var(--primary);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scan-box.scanning {
+            border-color: var(--success);
+            animation: scanningBorder 1.5s infinite;
+        }
+
+        .scan-box i {
+            font-size: 80px;
+            color: var(--primary);
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .scan-box.scanning i {
+            color: var(--success);
+            animation: scanningIcon 2s infinite;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(99, 102, 241, 0.1) 50%, transparent);
+            animation: scanAnimation 1.5s infinite linear;
+        }
+
+        .scan-info {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .scan-info-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .scan-info-subtitle {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* Checklist Screen */
+        .checklist-header {
+            background: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .checklist-header-content {
+            flex: 1;
+        }
+
+        .checklist-header h2 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .area-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-btn:active {
+            transform: scale(0.95);
+        }
+
+        .checklist-container {
+            padding: 24px;
+        }
+
+        .checklist {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item:active {
+            background: #f8fafc;
+        }
+
+        .checklist-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .toggle-switch {
+            width: 52px;
+            height: 28px;
+            background: #e2e8f0;
+            border-radius: 14px;
+            position: relative;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background: var(--success);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        /* Completion Screen */
+        .completion-container {
+            text-align: center;
+            padding: 60px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .completion-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: white;
+            font-size: 56px;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3);
+            animation: successScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .completion-title {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--success), #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .completion-subtitle {
+            font-size: 15px;
+            color: var(--gray);
+            margin-bottom: 32px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            right: 24px;
+            max-width: 432px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(-120px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .toast.warning .toast-icon {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .toast-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            from { background-position: 0 0; }
+            to { background-position: 100px 100px; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-checkpoint {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        @keyframes scanAnimation {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes scanningBorder {
+            0%, 100% { border-color: var(--primary); }
+            50% { border-color: var(--success); }
+        }
+
+        @keyframes scanningIcon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes successScale {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Report Screen */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background: white;
+            color: var(--dark);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* History Screen */
+        .history-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .history-time {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .history-description {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 16px;
+        }
+
+        .history-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .history-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .history-stat i {
+            color: var(--primary);
+        }
+
+        /* Profile Screen */
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 40px 24px;
+            text-align: center;
+            color: white;
+            border-radius: 0 0 32px 32px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto 16px;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .profile-id {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .profile-stats-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin: -32px 24px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .profile-stats-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .profile-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+
+        .profile-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .profile-stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scan-box {
+                width: 240px;
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Success</div>
+            <div class="toast-message" id="toastMessage">Operation completed</div>
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div class="screen active" id="screen-dashboard">
+        <div class="header">
+            <div class="header-top">
+                <div class="profile-section">
+                    <div class="avatar">AM</div>
+                    <div class="greeting">
+                        <h1 id="greetingText">Good Morning, Alex 👋</h1>
+                        <p id="currentDate">Monday, March 18, 2024</p>
+                    </div>
+                </div>
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+
+            <div class="active-task">
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">Morning Security Checks</div>
+                        <div class="task-location">
+                            <div class="pulse-dot"></div>
+                            <span>Warehouse Zone A</span>
+                        </div>
+                    </div>
+                    <button class="quick-action-btn" id="callBtn">
+                        <i class="fas fa-phone-alt"></i>
+                    </button>
+                </div>
+                <div class="task-progress">
+                    <div class="task-stat">
+                        <div class="task-stat-value" id="taskAreas">8/12</div>
+                        <div class="task-stat-label">Areas</div>
+                    </div>
+                    <div class="task-stat">
+                        <div class="task-stat-value" id="taskQR">32/45</div>
+                        <div class="task-stat-label">QR Codes</div>
+                    </div>
+                    <div class="task-stat">
+                        <div class="task-stat-value" id="taskTime">02:17</div>
+                        <div class="task-stat-label">Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-value" id="areasVisited">8</div>
+                    <div class="stat-label">Areas Visited</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div class="stat-value" id="qrScanned">32</div>
+                    <div class="stat-label">QR Scanned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="timeSpent">02:17</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+            </div>
+
+            <div class="progress-card">
+                <svg width="0" height="0">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6366f1" />
+                            <stop offset="100%" stop-color="#8b5cf6" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="progress-header">
+                    <div class="progress-title">Daily Progress</div>
+                    <div class="progress-value">32 / 45</div>
+                </div>
+                
+                <div class="progress-ring-wrapper">
+                    <svg width="180" height="180">
+                        <circle class="progress-ring-bg" cx="90" cy="90" r="80"></circle>
+                        <circle class="progress-ring-fill" cx="90" cy="90" r="80" stroke-dasharray="502.4" stroke-dashoffset="150.72" id="progressRing"></circle>
+                    </svg>
+                    <div class="progress-center">
+                        <div class="progress-percent" id="progressPercent">70%</div>
+                        <div class="progress-label">Complete</div>
+                    </div>
+                </div>
+                
+                <div class="progress-info">
+                    <i class="fas fa-route"></i>
+                    <span>4 areas remaining</span>
+                </div>
+            </div>
+
+            <div class="route-card">
+                <div class="route-title">
+                    <i class="fas fa-route"></i>
+                    Today's Route
+                </div>
+                <div class="timeline">
+                    <div class="timeline-line">
+                        <div class="timeline-line-fill" id="timelineFill"></div>
+                    </div>
+                    
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-location">Entrance</div>
+                            <div class="timeline-time">08:15 AM</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-location">Storage Area A</div>
+                            <div class="timeline-time">08:42 AM</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-location">Loading Dock</div>
+                            <div class="timeline-time">09:18 AM</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item current">
+                        <div class="timeline-dot">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-location">Warehouse A</div>
+                            <div class="timeline-time">In Progress</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item pending">
+                        <div class="timeline-dot">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-location">Office Area</div>
+                            <div class="timeline-time">Pending</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="scanBtn">
+                    <i class="fas fa-qrcode"></i>
+                    Scan QR Code
+                </button>
+                <button class="btn btn-secondary" id="endTripBtn">
+                    End Trip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Screen -->
+    <div class="screen" id="screen-scan">
+        <div class="checklist-header">
+            <div class="checklist-header-content">
+                <h2>Scan QR Code</h2>
+                <div class="area-badge">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="scanCurrentArea">Warehouse A</span>
+                </div>
+            </div>
+            <button class="close-btn" id="closeScanBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
+        <div class="scan-container">
+            <div class="scan-box" id="scanBox">
+                <i class="fas fa-qrcode"></i>
+                <div class="scan-overlay"></div>
+            </div>
+            
+            <div class="scan-info">
+                <div class="scan-info-title">Current Area: <span id="scanAreaName">Warehouse A</span></div>
+                <div class="scan-info-subtitle" id="scanInstruction">Scan entry QR to begin checklist</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="simulateScanBtn">
+                    <i class="fas fa-qrcode"></i>
+                    Simulate QR Scan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist Screen -->
+    <div class="screen" id="screen-checklist">
+        <div class="checklist-header">
+            <div class="checklist-header-content">
+                <h2 id="checklistTitle">Warehouse A Checklist</h2>
+                <div class="area-badge">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Security Checks</span>
+                </div>
+            </div>
+            <button class="close-btn" id="closeChecklistBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="checklist-container">
+            <div class="checklist" id="checklistItems">
+                <!-- Checklist items will be added dynamically -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="completeChecklistBtn" disabled>
+                    <i class="fas fa-check-circle"></i>
+                    Complete Checklist
+                </button>
+                <button class="btn btn-secondary" id="reportIssueBtn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Report Issue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="screen" id="screen-completion">
+        <div class="completion-container">
+            <div class="completion-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            
+            <h2 class="completion-title" id="completionArea">Warehouse A</h2>
+            <p class="completion-subtitle">Completed Successfully</p>
+            
+            <div class="stats-grid" style="margin-bottom: 32px;">
+                <div class="stat-card">
+                    <div class="stat-value" id="completionTime">18m</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completionChecks">5/5</div>
+                    <div class="stat-label">Checks Done</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success" id="nextAreaBtn">
+                    <i class="fas fa-arrow-right"></i>
+                    Next Area
+                </button>
+                <button class="btn btn-secondary" id="backToHomeBtn">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Screen -->
+    <div class="screen" id="screen-report">
+        <div class="checklist-header">
+            <div class="checklist-header-content">
+                <h2>Report Issue</h2>
+            </div>
+            <button class="close-btn" id="closeReportBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="checklist-container">
+            <div class="form-group">
+                <label class="form-label" for="issueArea">Area</label>
+                <select class="form-select" id="issueArea">
+                    <option value="">Select area</option>
+                    <option value="warehouse-a" selected>Warehouse A</option>
+                    <option value="loading-dock">Loading Dock</option>
+                    <option value="cold-storage">Cold Storage</option>
+                    <option value="sorting-area">Sorting Area</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="issueType">Issue Type</label>
+                <select class="form-select" id="issueType">
+                    <option value="">Select type</option>
+                    <option value="security">Security Concern</option>
+                    <option value="equipment">Equipment Issue</option>
+                    <option value="safety">Safety Hazard</option>
+                    <option value="cleanliness">Cleanliness</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="issueDescription">Description</label>
+                <textarea class="form-textarea" id="issueDescription" placeholder="Describe the issue in detail..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="submitIssueBtn">
+                <i class="fas fa-paper-plane"></i>
+                Submit Report
+            </button>
+        </div>
+    </div>
+
+    <!-- History Screen -->
+    <div class="screen" id="screen-history">
+        <div class="header" style="padding-bottom: 24px;">
+            <div class="header-top">
+                <div class="profile-section">
+                    <div class="avatar">AM</div>
+                    <div class="greeting">
+                        <h1>Activity History</h1>
+                        <p>Past shifts and activities</p>
+                    </div>
+                </div>
+                <button class="notification-btn">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div style="color: var(--gray); font-size: 12px; margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Today, March 18</div>
+            
+            <div class="history-card">
+                <div class="history-header">
+                    <div class="history-title">Morning Security Round</div>
+                    <div class="history-time">08:15 AM - 10:45 AM</div>
+                </div>
+                <div class="history-description">
+                    Completed security checks in Warehouse Zone A and B
+                </div>
+                <div class="history-stats">
+                    <div class="history-stat">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>8 Areas</span>
+                    </div>
+                    <div class="history-stat">
+                        <i class="fas fa-qrcode"></i>
+                        <span>32 QR Scans</span>
+                    </div>
+                    <div class="history-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>2h 30m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div class="screen" id="screen-profile">
+        <div class="profile-header">
+            <div class="profile-avatar">AM</div>
+            <div class="profile-name">Alex Morgan</div>
+            <div class="profile-id">EMP-4826 • Warehouse Staff</div>
+        </div>
+
+        <div class="profile-stats-card">
+            <div class="profile-stats-title">This Week's Performance</div>
+            <div class="profile-stats-grid">
+                <div>
+                    <div class="profile-stat-value">42</div>
+                    <div class="profile-stat-label">Areas</div>
+                </div>
+                <div>
+                    <div class="profile-stat-value">168</div>
+                    <div class="profile-stat-label">QR Scans</div>
+                </div>
+                <div>
+                    <div class="profile-stat-value">14.5h</div>
+                    <div class="profile-stat-label">Active Time</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div class="action-buttons">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-question-circle"></i>
+                    Help & Support
+                </button>
+                <button class="btn btn-secondary" id="signoutBtn" style="background: #fee2e2; color: var(--danger); border-color: #fecaca;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active" data-screen="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="history">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+        <div class="nav-center" id="scanNavBtn">
+            <i class="fas fa-qrcode"></i>
+        </div>
+        <a href="#" class="nav-item" data-screen="report">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Report</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <script>
+        // Employee data
+        const employeeData = {
+            name: "Alex Morgan",
+            areasVisited: 8,
+            totalAreas: 12,
+            qrScanned: 32,
+            totalQR: 45,
+            activeTime: "02:17",
+            progressPercentage: 70,
+            currentArea: "Warehouse A",
+            checklistItems: [
+                { id: 1, label: "Check cables and wiring", checked: false },
+                { id: 2, label: "CCTV cameras functional", checked: false },
+                { id: 3, label: "All doors properly locked", checked: false },
+                { id: 4, label: "Lighting systems operational", checked: false },
+                { id: 5, label: "Fire extinguisher accessible", checked: false }
+            ],
+            isEntryScan: true
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            updateGreeting();
+            updateStats();
+            setupEventListeners();
+            setupNavigation();
+            setupChecklist();
+        });
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const dateEl = document.getElementById('currentDate');
+            if (dateEl) dateEl.textContent = dateString;
+        }
+
+        // Update greeting
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greeting = "Hello";
+            
+            if (hour < 12) greeting = "Good Morning";
+            else if (hour < 18) greeting = "Good Afternoon";
+            else greeting = "Good Evening";
+            
+            const greetingEl = document.getElementById('greetingText');
+            if (greetingEl) greetingEl.textContent = `${greeting}, ${employeeData.name.split(' ')[0]} 👋`;
+        }
+
+        // Update stats
+        function updateStats() {
+            const elements = {
+                areasVisited: document.getElementById('areasVisited'),
+                qrScanned: document.getElementById('qrScanned'),
+                timeSpent: document.getElementById('timeSpent'),
+                taskAreas: document.getElementById('taskAreas'),
+                taskQR: document.getElementById('taskQR'),
+                taskTime: document.getElementById('taskTime'),
+                progressPercent: document.getElementById('progressPercent')
+            };
+
+            if (elements.areasVisited) elements.areasVisited.textContent = employeeData.areasVisited;
+            if (elements.qrScanned) elements.qrScanned.textContent = employeeData.qrScanned;
+            if (elements.timeSpent) elements.timeSpent.textContent = employeeData.activeTime;
+            if (elements.taskAreas) elements.taskAreas.textContent = `${employeeData.areasVisited}/${employeeData.totalAreas}`;
+            if (elements.taskQR) elements.taskQR.textContent = `${employeeData.qrScanned}/${employeeData.totalQR}`;
+            if (elements.taskTime) elements.taskTime.textContent = employeeData.activeTime;
+            if (elements.progressPercent) elements.progressPercent.textContent = `${employeeData.progressPercentage}%`;
+
+            // Update progress ring
+            const circumference = 502.4;
+            const offset = circumference - (employeeData.progressPercentage / 100) * circumference;
+            const ring = document.getElementById('progressRing');
+            if (ring) ring.style.strokeDashoffset = offset;
+        }
+
+        // Setup checklist
+        function setupChecklist() {
+            const container = document.getElementById('checklistItems');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            employeeData.checklistItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'checklist-item';
+                div.dataset.id = item.id;
+                div.innerHTML = `
+                    <div class="checklist-label">${item.label}</div>
+                    <div class="toggle-switch ${item.checked ? 'active' : ''}" data-id="${item.id}"></div>
+                `;
+                container.appendChild(div);
+            });
+
+            updateCompleteButton();
+        }
+
+        // Toggle checklist item
+        function toggleChecklistItem(id) {
+            const item = employeeData.checklistItems.find(i => i.id === id);
+            if (!item) return;
+
+            item.checked = !item.checked;
+
+            const toggle = document.querySelector(`.toggle-switch[data-id="${id}"]`);
+            if (toggle) {
+                toggle.classList.toggle('active');
+                if (item.checked) {
+                    showToast("Check Completed", `${item.label} marked as OK`, "success");
+                }
+            }
+
+            updateCompleteButton();
+        }
+
+        // Update complete button
+        function updateCompleteButton() {
+            const allChecked = employeeData.checklistItems.every(item => item.checked);
+            const btn = document.getElementById('completeChecklistBtn');
+            if (btn) {
+                btn.disabled = !allChecked;
+                if (allChecked) {
+                    btn.style.opacity = '1';
+                } else {
+                    btn.style.opacity = '0.5';
+                }
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Scan buttons
+            const scanBtn = document.getElementById('scanBtn');
+            const scanNavBtn = document.getElementById('scanNavBtn');
+            const closeScanBtn = document.getElementById('closeScanBtn');
+            const simulateScanBtn = document.getElementById('simulateScanBtn');
+
+            if (scanBtn) scanBtn.addEventListener('click', () => showScanScreen());
+            if (scanNavBtn) scanNavBtn.addEventListener('click', () => showScanScreen());
+            if (closeScanBtn) closeScanBtn.addEventListener('click', () => showScreen('dashboard'));
+            if (simulateScanBtn) simulateScanBtn.addEventListener('click', simulateQRScan);
+
+            // Checklist buttons
+            const closeChecklistBtn = document.getElementById('closeChecklistBtn');
+            const completeChecklistBtn = document.getElementById('completeChecklistBtn');
+            const reportIssueBtn = document.getElementById('reportIssueBtn');
+
+            if (closeChecklistBtn) closeChecklistBtn.addEventListener('click', () => showScreen('scan'));
+            if (completeChecklistBtn) completeChecklistBtn.addEventListener('click', completeChecklist);
+            if (reportIssueBtn) reportIssueBtn.addEventListener('click', () => showScreen('report'));
+
+            // Checklist toggle switches
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('toggle-switch')) {
+                    const id = parseInt(e.target.dataset.id);
+                    toggleChecklistItem(id);
+                }
+            });
+
+            // Completion buttons
+            const nextAreaBtn = document.getElementById('nextAreaBtn');
+            const backToHomeBtn = document.getElementById('backToHomeBtn');
+
+            if (nextAreaBtn) nextAreaBtn.addEventListener('click', nextArea);
+            if (backToHomeBtn) backToHomeBtn.addEventListener('click', () => showScreen('dashboard'));
+
+            // Report buttons
+            const closeReportBtn = document.getElementById('closeReportBtn');
+            const submitIssueBtn = document.getElementById('submitIssueBtn');
+
+            if (closeReportBtn) closeReportBtn.addEventListener('click', () => showScreen('dashboard'));
+            if (submitIssueBtn) submitIssueBtn.addEventListener('click', submitIssue);
+
+            // Other buttons
+            const endTripBtn = document.getElementById('endTripBtn');
+            const callBtn = document.getElementById('callBtn');
+            const notificationBtn = document.getElementById('notificationBtn');
+            const signoutBtn = document.getElementById('signoutBtn');
+
+            if (endTripBtn) endTripBtn.addEventListener('click', endTrip);
+            if (callBtn) callBtn.addEventListener('click', () => showToast("Calling", "Calling supervisor...", "info"));
+            if (notificationBtn) notificationBtn.addEventListener('click', () => showToast("Notifications", "3 new notifications", "info"));
+            if (signoutBtn) signoutBtn.addEventListener('click', () => showToast("Signed Out", "You have been signed out successfully", "success"));
+
+            // Toast close
+            const toastClose = document.getElementById('toastClose');
+            if (toastClose) toastClose.addEventListener('click', hideToast);
+        }
+
+        // Setup navigation
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const screenName = this.getAttribute('data-screen');
+                    if (screenName) {
+                        showScreen(screenName);
+                        updateNavigationActive(screenName);
+                    }
+                });
+            });
+        }
+
+        // Update navigation active state
+        function updateNavigationActive(activeScreen) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            const activeItem = document.querySelector(`.nav-item[data-screen="${activeScreen}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        // Show screen
+        function showScreen(screenName) {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            const targetScreen = document.getElementById(`screen-${screenName}`);
+            if (targetScreen) targetScreen.classList.add('active');
+            
+            if (screenName === 'dashboard') {
+                updateStats();
+                updateDateTime();
+            }
+        }
+
+        // Show scan screen
+        function showScanScreen() {
+            employeeData.isEntryScan = true;
+            const scanInstruction = document.getElementById('scanInstruction');
+            const scanAreaName = document.getElementById('scanAreaName');
+            const scanCurrentArea = document.getElementById('scanCurrentArea');
+            
+            if (scanInstruction) scanInstruction.textContent = "Scan entry QR to begin checklist";
+            if (scanAreaName) scanAreaName.textContent = employeeData.currentArea;
+            if (scanCurrentArea) scanCurrentArea.textContent = employeeData.currentArea;
+            
+            showScreen('scan');
+            updateNavigationActive('scan');
+        }
+
+        // Simulate QR scan
+        function simulateQRScan() {
+            const scanBox = document.getElementById('scanBox');
+            if (!scanBox) return;
+
+            scanBox.classList.add('scanning');
+            showToast("Scanning", "Scanning QR code...", "info");
+
+            setTimeout(() => {
+                scanBox.classList.remove('scanning');
+
+                if (employeeData.isEntryScan) {
+                    showToast("Entry Scan", `Entered ${employeeData.currentArea}`, "success");
+                    employeeData.isEntryScan = false;
+                    
+                    const scanInstruction = document.getElementById('scanInstruction');
+                    if (scanInstruction) scanInstruction.textContent = "Scan exit QR to complete area";
+                    
+                    setTimeout(() => {
+                        const checklistTitle = document.getElementById('checklistTitle');
+                        if (checklistTitle) checklistTitle.textContent = `${employeeData.currentArea} Checklist`;
+                        showScreen('checklist');
+                    }, 1000);
+                } else {
+                    const allChecked = employeeData.checklistItems.every(item => item.checked);
+                    
+                    if (allChecked) {
+                        showToast("Exit Scan", `Exited ${employeeData.currentArea}`, "success");
+                        
+                        const completionArea = document.getElementById('completionArea');
+                        const completionTime = document.getElementById('completionTime');
+                        const completionChecks = document.getElementById('completionChecks');
+                        
+                        if (completionArea) completionArea.textContent = employeeData.currentArea;
+                        if (completionTime) completionTime.textContent = "18m";
+                        if (completionChecks) completionChecks.textContent = `${employeeData.checklistItems.length}/${employeeData.checklistItems.length}`;
+                        
+                        setTimeout(() => showScreen('completion'), 1000);
+                        
+                        employeeData.areasVisited++;
+                        employeeData.qrScanned++;
+                        employeeData.progressPercentage = Math.round((employeeData.qrScanned / employeeData.totalQR) * 100);
+                        employeeData.checklistItems.forEach(item => item.checked = false);
+                    } else {
+                        showToast("Checklist Required", "Please complete the checklist before scanning exit QR", "warning");
+                        showScreen('checklist');
+                    }
+                }
+            }, 1500);
+        }
+
+        // Complete checklist
+        function completeChecklist() {
+            showToast("Checklist Complete", "All checks completed! Now scan the exit QR code.", "success");
+            
+            setTimeout(() => {
+                employeeData.isEntryScan = false;
+                const scanInstruction = document.getElementById('scanInstruction');
+                if (scanInstruction) scanInstruction.textContent = "Scan exit QR to complete area";
+                showScreen('scan');
+            }, 1500);
+        }
+
+        // Next area
+        function nextArea() {
+            const areas = ["Loading Dock", "Cold Storage", "Sorting Area", "Shipping Dept", "Security Room"];
+            const currentIndex = areas.indexOf(employeeData.currentArea);
+            
+            if (currentIndex < areas.length - 1) {
+                employeeData.currentArea = areas[currentIndex + 1];
+            } else {
+                employeeData.currentArea = areas[0];
+            }
+            
+            showScanScreen();
+        }
+
+        // Submit issue
+        function submitIssue() {
+            const area = document.getElementById('issueArea');
+            const type = document.getElementById('issueType');
+            const description = document.getElementById('issueDescription');
+            
+            if (!area?.value || !type?.value || !description?.value) {
+                showToast("Error", "Please fill in all required fields", "error");
+                return;
+            }
+            
+            showToast("Issue Reported", "Issue reported successfully! Maintenance team has been notified.", "success");
+            
+            if (area) area.value = 'warehouse-a';
+            if (type) type.value = '';
+            if (description) description.value = '';
+            
+            setTimeout(() => showScreen('dashboard'), 2000);
+        }
+
+        // End trip
+        function endTrip() {
+            showToast("Trip Ended", "Your trip has been ended successfully!", "success");
+            employeeData.areasVisited = 0;
+            employeeData.qrScanned = 0;
+            employeeData.activeTime = "00:00";
+            employeeData.progressPercentage = 0;
+            updateStats();
+        }
+
+        // Show toast
+        function showToast(title, message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = toast?.querySelector('.toast-icon i');
+            
+            if (!toast || !toastTitle || !toastMessage || !toastIcon) return;
+
+            toast.className = 'toast ' + type;
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            const icons = {
+                success: 'fa-check',
+                error: 'fa-times',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            toastIcon.className = `fas ${icons[type] || icons.info}`;
+            toast.classList.add('show');
+
+            setTimeout(hideToast, 4000);
+        }
+
+        // Hide toast
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            if (toast) toast.classList.remove('show');
+        }
+
+        // Time increment simulation
+        setInterval(() => {
+            const dashboard = document.getElementById('screen-dashboard');
+            if (dashboard?.classList.contains('active')) {
+                const timeParts = employeeData.activeTime.split(':');
+                let hours = parseInt(timeParts[0]);
+                let minutes = parseInt(timeParts[1]);
+                
+                minutes += 1;
+                if (minutes >= 60) {
+                    hours += 1;
+                    minutes = 0;
+                }
+                
+                employeeData.activeTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                
+                const timeSpent = document.getElementById('timeSpent');
+                const taskTime = document.getElementById('taskTime');
+                if (timeSpent) timeSpent.textContent = employeeData.activeTime;
+                if (taskTime) taskTime.textContent = employeeData.activeTime;
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
